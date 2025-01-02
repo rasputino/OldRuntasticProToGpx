@@ -11,12 +11,14 @@ namespace OldRuntasticProToGpx.Library
     internal class GpxFile
     {
 
-        internal static void BatchCreateGpxFileWithGarminExtensions(string outputFolder, List<OldRuntasticData> oldRuntasticData)
+        internal static void BatchCreateGpxFileWithGarminExtensions(string outputFolder, List<OldRuntasticData> oldRuntasticData, ILogger _logger)
         {
+            _logger.Log("Exporting gpx files...");
             foreach(var oldSession in oldRuntasticData)
             {
                 var filePath = Path.Combine(outputFolder, $"{oldSession.SessionId}.gpx");
                 CreateGpxFileWithGarminExtensions(filePath, oldSession);
+                _logger.Log($"{filePath} created.");
             }
         }
 

@@ -12,10 +12,12 @@ namespace OldRuntasticProToGpx.Library
     {
 
         private string _dbPath;
+        private ILogger _logger;
 
-        internal SourceFile(string fileName)
+        internal SourceFile(string fileName, ILogger logger)
         {
             _dbPath = fileName;
+            _logger = logger;
             if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
             {
                 throw new UserMessageException("Source file doesn't exist");
@@ -24,12 +26,14 @@ namespace OldRuntasticProToGpx.Library
 
         internal List<OldRuntasticData> GetGpsData()
         {
+            _logger.Log("Extracting data...");
             using (var connection = new SQLiteConnection($"Data Source={_dbPath};Version=3;"))
             {
                 connection.Open();
                 string query = "SELECT _ID, gpsTrace, avgPulse, maxPulse, note, hrTrace FROM session WHERE gpsTrace IS NOT NULL";
 
                 var data = new List<OldRuntasticData>();
+                int discardedSessions = 0;
                 using (var command = new SQLiteCommand(query, connection))
                 using (var reader = command.ExecuteReader())
                 {
@@ -49,8 +53,19 @@ namespace OldRuntasticProToGpx.Library
                         {
                             data.Add(sessionData);
                         }
+                        else
+                        {
+                            discardedSessions++;
+                        }
+
+                        if((data.Count + discardedSessions) % 10 == 0)
+                        {
+                            _logger.Log($"{data.Count + discardedSessions} rows processed.");
+                        }
                     }
                 }
+
+                _logger.Log($"{data.Count} sessions extracted. {discardedSessions} discarded.");
 
                 return data;
             }

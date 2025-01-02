@@ -1,10 +1,16 @@
+using OldRuntasticProToGpx.Library;
+using System.Windows.Forms;
+
 namespace OldRuntasticProToGpx
 {
     public partial class Main : Form
     {
+        private readonly ILogger _logger;
+
         public Main()
         {
             InitializeComponent();
+            _logger = new ListBoxLogger(listBoxFiles);
         }
 
         private void buttonChooseFile_Click(object sender, EventArgs e)
@@ -39,43 +45,28 @@ namespace OldRuntasticProToGpx
             if (string.IsNullOrWhiteSpace(textBoxOutputPath.Text) || !Directory.Exists(textBoxOutputPath.Text))
             {
                 textBoxOutputPath.BackColor = Color.Yellow;
-                ClearAndLog("Invalid output path");
+                _logger.ClearAndLog("Invalid output path");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(textBoxSourceFile.Text) || !File.Exists(textBoxSourceFile.Text))
             {
                 textBoxSourceFile.BackColor = Color.Yellow;
-                ClearAndLog("Invalid source file");
+                _logger.ClearAndLog("Invalid source file");
                 return;
             }
 
             try
             {
-                Library.Converter.Convert(textBoxSourceFile.Text, textBoxOutputPath.Text);
+                Library.Converter.Convert(textBoxSourceFile.Text, textBoxOutputPath.Text, _logger);
             }
             catch(Exception ex)
             {
-                ClearAndLog("Error converting data");
-                AppendLog(ex.ToString());
+                _logger.ClearAndLog("Error converting data");
+                _logger.LogSplitted(ex.ToString());
             }
         }
 
 
-        private void ClearAndLog(string msj)
-        {
-            listBoxFiles.Items.Clear();
-            listBoxFiles.Items.Add(msj);
-        }
-
-        private void AppendLog(string msj)
-        {
-            listBoxFiles.Items.Add(string.Empty);
-            var splittedText = msj.Split('\n');
-            foreach (var line in splittedText)
-            {
-                listBoxFiles.Items.Add(line);
-            }
-        }
     }
 }

@@ -32,3 +32,7 @@ Open the application, select this file, choose the destination folder where you 
 ## Usage
 
 You can download the latest release or you can compile it.
+
+
+![image](https://github.com/user-attachments/assets/a5967ef1-374c-451f-8af7-e664d6bc53fb)
+
